@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from pipelines.ingestion_pipeline import IngestionPipeline
 
 pdf_path = "../data/reports/sample report.pdf"

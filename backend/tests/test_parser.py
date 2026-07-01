@@ -1,4 +1,7 @@
-from ingestion.pdf_parser import PDFParser
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))from ingestion.pdf_parser import PDFParser
 
 pdf_path = "../data/reports/sample report.pdf"
 

@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from ingestion.pdf_parser import PDFParser
 from preprocessing.text_cleaner import TextCleaner
 from preprocessing.chunker import Chunker
