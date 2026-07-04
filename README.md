@@ -1,8 +1,8 @@
 # AlphaInsights
 
-AlphaInsights is an AI-powered financial document analysis project that demonstrates how Retrieval-Augmented Generation (RAG) systems are built from the ground up. The project focuses on processing corporate financial reports, generating semantic embeddings, and preparing data for intelligent retrieval and question answering.
+AlphaInsights is an AI-powered financial document analysis project that demonstrates how Retrieval-Augmented Generation (RAG) systems are built from the ground up. The project focuses on processing corporate financial reports, generating semantic embeddings, storing them in a vector database, and retrieving relevant information through semantic search.
 
-The goal of this project is not only to build a working RAG application but also to understand every stage of the pipeline by implementing the core components step by step.
+The goal of this project is to understand and implement each stage of a modern RAG pipeline while following clean software engineering practices.
 
 ---
 
@@ -43,7 +43,6 @@ Implemented:
 - Configurable chunk size
 - Configurable chunk overlap
 - Chunk metadata generation
-- Independent module testing
 
 ---
 
@@ -51,11 +50,24 @@ Implemented:
 
 Implemented:
 
-- Local embedding generation using **BAAI/bge-small-en-v1.5**
+- Local embedding generation using BAAI/bge-small-en-v1.5
 - LangChain embedding integration
 - Batch embedding generation
 - End-to-end ingestion pipeline
-- Embedding pipeline testing
+
+---
+
+## ✅ Phase 5 – Vector Database & Semantic Search
+
+Implemented:
+
+- Docker-based Qdrant setup
+- Qdrant client integration
+- Vector collection creation
+- Uploading document embeddings
+- Payload storage with chunk metadata
+- Semantic similarity search
+- Separate ingestion and search workflows
 
 ---
 
@@ -77,7 +89,10 @@ Chunk Generator
 Embedding Generator
       │
       ▼
-Vector Embeddings
+Qdrant Vector Database
+      │
+      ▼
+Semantic Search
 ```
 
 ---
@@ -90,20 +105,11 @@ AlphaInsights/
 backend/
 │
 ├── embeddings/
-│   └── embedding_generator.py
-│
 ├── ingestion/
-│   └── pdf_parser.py
-│
 ├── pipelines/
-│   └── ingestion_pipeline.py
-│
 ├── preprocessing/
-│   ├── text_cleaner.py
-│   └── chunker.py
-│
+├── vectorstore/
 ├── tests/
-│
 ├── main.py
 └── requirements.txt
 
@@ -129,6 +135,7 @@ README.md
 - Sentence Transformers
 - PyMuPDF
 - pdfplumber
+- Qdrant Client
 
 ## Frontend
 
@@ -142,6 +149,11 @@ README.md
 - Hugging Face
 - LangChain Embeddings
 
+## Database
+
+- Qdrant
+- Docker
+
 ## Development Tools
 
 - Git
@@ -153,25 +165,23 @@ README.md
 
 # Current Pipeline
 
-The ingestion pipeline currently performs the following steps:
+The current workflow performs the following steps:
 
 1. Read a financial PDF
-2. Extract the document text
-3. Clean and normalize the extracted content
+2. Extract document text
+3. Clean and normalize the content
 4. Split the document into overlapping chunks
-5. Generate semantic embeddings for every chunk
-
-Each chunk is enriched with metadata and converted into a vector representation that will be stored in a vector database during the next phase.
+5. Generate semantic embeddings
+6. Store embeddings in Qdrant
+7. Retrieve relevant chunks using semantic similarity search
 
 ---
 
 # Upcoming Phases
 
-- Vector Database (Qdrant)
-- Semantic Retrieval
-- Hybrid Search (BM25 + Vector Search)
-- Reranking
-- LangGraph Agent Workflow
+- Retrieval Layer
+- Hybrid Search (Vector + BM25)
+- LLM Integration
 - Financial Question Answering
 - Frontend Integration
 - Deployment
@@ -180,14 +190,14 @@ Each chunk is enriched with metadata and converted into a vector representation 
 
 # Why AlphaInsights?
 
-Most RAG tutorials focus on using high-level libraries without explaining what happens internally. AlphaInsights takes a different approach by implementing each stage of the pipeline step by step before integrating production-ready tools.
+Many RAG tutorials rely heavily on high-level libraries without explaining how the individual components work together. AlphaInsights takes a step-by-step approach, implementing each stage of the pipeline while maintaining a modular and production-oriented architecture.
 
-This project is intended as both a learning experience and a portfolio project that demonstrates practical software engineering, AI integration, and Retrieval-Augmented Generation concepts.
+The project is designed as both a learning experience and a portfolio project that demonstrates practical skills in AI engineering, backend development, vector databases, and Retrieval-Augmented Generation.
 
 ---
 
 # Current Status
 
-**Version:** v0.4
+**Version:** v0.5
 
-**Status:** Phase 4 – Embedding Generation Completed
+**Status:** Phase 5 – Vector Database & Semantic Search Completed
