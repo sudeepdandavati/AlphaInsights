@@ -1,8 +1,8 @@
 # AlphaInsights
 
-AlphaInsights is an AI-powered financial document analysis project that demonstrates how Retrieval-Augmented Generation (RAG) systems are built from the ground up. The project focuses on processing corporate financial reports, generating semantic embeddings, storing them in a vector database, and retrieving relevant information through semantic search.
+AlphaInsights is an AI-powered financial document analysis platform that demonstrates how Retrieval-Augmented Generation (RAG) systems are built from the ground up. The project processes corporate financial reports, generates semantic embeddings, stores them in a vector database, retrieves relevant information through semantic search, and uses a local Large Language Model (LLM) to generate accurate, context-aware answers.
 
-The goal of this project is to understand and implement each stage of a modern RAG pipeline while following clean software engineering practices.
+The goal of this project is to understand and implement every stage of a modern RAG pipeline while following clean software engineering practices and a modular architecture.
 
 ---
 
@@ -51,7 +51,7 @@ Implemented:
 Implemented:
 
 - Local embedding generation using BAAI/bge-small-en-v1.5
-- LangChain embedding integration
+- Sentence Transformers integration
 - Batch embedding generation
 - End-to-end ingestion pipeline
 
@@ -71,9 +71,35 @@ Implemented:
 
 ---
 
+## ✅ Phase 6 – Retrieval Layer
+
+Implemented:
+
+- Production-ready Retriever module
+- Retrieval abstraction
+- Clean retrieval response objects
+- FastAPI semantic search endpoint (`/search`)
+- Structured API responses
+
+---
+
+## ✅ Phase 7 – Local LLM-powered RAG Pipeline
+
+Implemented:
+
+- Ollama integration
+- Llama 3.2 local model
+- Prompt Builder
+- Answer Generator
+- End-to-end Retrieval-Augmented Generation (RAG)
+- FastAPI `/ask` endpoint
+- Source-aware AI responses
+
+---
+
 # Project Architecture
 
-```
+```text
 Financial PDF
       │
       ▼
@@ -92,24 +118,38 @@ Embedding Generator
 Qdrant Vector Database
       │
       ▼
-Semantic Search
+Retriever
+      │
+      ▼
+Prompt Builder
+      │
+      ▼
+Ollama (Llama 3.2)
+      │
+      ▼
+Generated Answer
+      │
+      ▼
+FastAPI API
 ```
 
 ---
 
 # Project Structure
 
-```
+```text
 AlphaInsights/
 
 backend/
 │
 ├── embeddings/
 ├── ingestion/
+├── llm/
 ├── pipelines/
 ├── preprocessing/
-├── vectorstore/
+├── retrieval/
 ├── tests/
+├── vectorstore/
 ├── main.py
 └── requirements.txt
 
@@ -135,7 +175,18 @@ README.md
 - Sentence Transformers
 - PyMuPDF
 - pdfplumber
-- Qdrant Client
+
+## AI & Machine Learning
+
+- BAAI/bge-small-en-v1.5
+- Sentence Transformers
+- Ollama
+- Llama 3.2
+
+## Vector Database
+
+- Qdrant
+- Docker
 
 ## Frontend
 
@@ -143,23 +194,95 @@ README.md
 - Vite
 - Axios
 
-## AI & Machine Learning
-
-- BAAI/bge-small-en-v1.5
-- Hugging Face
-- LangChain Embeddings
-
-## Database
-
-- Qdrant
-- Docker
-
 ## Development Tools
 
 - Git
 - GitHub
 - Docker
-- Postman
+- Swagger UI
+
+---
+
+# Running Qdrant
+
+Start the vector database:
+
+```bash
+docker run -d \
+  --name alphainsights-qdrant \
+  -p 6333:6333 \
+  -p 6334:6334 \
+  qdrant/qdrant
+```
+
+Verify:
+
+```bash
+docker ps
+```
+
+---
+
+# Running Ollama
+
+Download the model:
+
+```bash
+ollama pull llama3.2
+```
+
+Start the model:
+
+```bash
+ollama run llama3.2
+```
+
+---
+
+# Running the Backend
+
+```bash
+cd backend
+
+python -m venv venv
+
+venv\Scripts\activate
+
+pip install -r requirements.txt
+
+uvicorn main:app --reload
+```
+
+Swagger UI:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+# API Endpoints
+
+## Search
+
+```
+POST /search
+```
+
+Returns the most relevant document chunks from Qdrant.
+
+---
+
+## Ask
+
+```
+POST /ask
+```
+
+Runs the complete Retrieval-Augmented Generation (RAG) pipeline and returns:
+
+- AI-generated answer
+- Supporting source chunks
 
 ---
 
@@ -173,31 +296,51 @@ The current workflow performs the following steps:
 4. Split the document into overlapping chunks
 5. Generate semantic embeddings
 6. Store embeddings in Qdrant
-7. Retrieve relevant chunks using semantic similarity search
+7. Retrieve relevant chunks
+8. Build an LLM prompt
+9. Generate an answer using Ollama (Llama 3.2)
+10. Return the answer with supporting sources
+
+---
+
+# Running Tests
+
+```bash
+python tests/test_pipeline.py
+
+python tests/test_search_qdrant.py
+
+python tests/test_retriever.py
+
+python tests/test_llm.py
+```
 
 ---
 
 # Upcoming Phases
 
-- Retrieval Layer
-- Hybrid Search (Vector + BM25)
-- LLM Integration
-- Financial Question Answering
-- Frontend Integration
+- React Chat Interface
+- Conversation History
+- Hybrid Search (Vector + Keyword)
+- Multi-document Support
+- Streaming Responses
 - Deployment
+- Authentication
 
 ---
 
 # Why AlphaInsights?
 
-Many RAG tutorials rely heavily on high-level libraries without explaining how the individual components work together. AlphaInsights takes a step-by-step approach, implementing each stage of the pipeline while maintaining a modular and production-oriented architecture.
+Many RAG tutorials rely heavily on high-level libraries without explaining how the individual components work together.
 
-The project is designed as both a learning experience and a portfolio project that demonstrates practical skills in AI engineering, backend development, vector databases, and Retrieval-Augmented Generation.
+AlphaInsights takes a step-by-step approach by implementing every stage of the pipeline—from PDF ingestion to AI-generated answers—while maintaining a modular, production-oriented architecture.
+
+The project serves as both a learning experience and a portfolio project demonstrating practical skills in AI engineering, backend development, vector databases, Retrieval-Augmented Generation (RAG), and LLM integration.
 
 ---
 
 # Current Status
 
-**Version:** v0.5
+**Version:** v0.7
 
-**Status:** Phase 5 – Vector Database & Semantic Search Completed
+**Status:** ✅ Phase 7 – Local LLM-powered RAG Pipeline Completed
