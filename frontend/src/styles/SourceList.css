@@ -1,0 +1,60 @@
+.source-list {
+    margin-top: 28px;
+}
+
+.source-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-size: 18px;
+    font-weight: 600;
+
+    color: #f8fafc;
+
+    margin-bottom: 16px;
+}
+
+.source-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.source-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 10px 16px;
+
+    background: #0f172a;
+
+    border: 1px solid #334155;
+
+    border-radius: 999px;
+
+    transition: all 0.25s ease;
+
+    cursor: default;
+}
+
+.source-card:hover {
+    border-color: #3b82f6;
+    background: #172033;
+    transform: translateY(-2px);
+}
+
+.source-chunk {
+    color: #f8fafc;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.source-score {
+    color: #60a5fa;
+    font-weight: 700;
+    white-space: nowrap;
+    border-left: 1px solid #334155;
+    padding-left: 12px;
+}

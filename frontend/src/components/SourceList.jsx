@@ -1,3 +1,5 @@
+import "../styles/SourceList.css";
+
 function SourceList({ sources }) {
     if (!sources || sources.length === 0) {
         return null;
@@ -6,17 +8,30 @@ function SourceList({ sources }) {
     return (
         <div className="source-list">
 
-            <h2>Sources</h2>
+            <h3 className="source-title">
+                📄 Sources
+            </h3>
 
-            <ul>
+            <div className="source-grid">
+
                 {sources.map((source, index) => (
-                    <li key={index}>
-                        <strong>Chunk ID:</strong> {source.chunk_id}
-                        {" | "}
-                        <strong>Score:</strong> {source.score.toFixed(4)}
-                    </li>
+
+                    <div
+                        key={index}
+                        className="source-card"
+                    >
+                        <span className="source-chunk">
+                            📄 Chunk {source.chunk_id}
+                        </span>
+
+                        <span className="source-score">
+                            {(source.score * 100).toFixed(1)}% Match
+                        </span>
+                    </div>
+
                 ))}
-            </ul>
+
+            </div>
 
         </div>
     );

@@ -1,3 +1,5 @@
+import uuid
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
@@ -46,6 +48,8 @@ class QdrantStore:
         self,
         chunks,
         embeddings,
+        document_name,
+        document_id,
         collection_name="alphainsights"
     ):
         """
@@ -54,15 +58,19 @@ class QdrantStore:
 
         points = []
 
-        for idx, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+        for chunk, embedding in zip(chunks, embeddings):
 
             points.append(
                 PointStruct(
-                    id=idx,
+                    id=str(uuid.uuid4()),
                     vector=embedding,
                     payload={
+                        "document_id": document_id,
+                        "document_name": document_name,
+
                         "chunk_id": chunk["chunk_id"],
                         "text": chunk["text"],
+
                         "start": chunk["start"],
                         "end": chunk["end"],
                         "length": chunk["length"],

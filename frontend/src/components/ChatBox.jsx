@@ -1,43 +1,43 @@
-import { useState } from "react";
-import { askQuestion } from "../services/api";
+import "../styles/ChatBox.css";
 
-function ChatBox({ onResponse }) {
-    const [question, setQuestion] = useState("");
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = async () => {
-        if (!question.trim()) return;
-
-        setLoading(true);
-
-        try {
-            const result = await askQuestion(question);
-
-            onResponse(result);
-
-            setQuestion("");
-        } catch (error) {
-            alert("Failed to contact the backend.");
-        } finally {
-            setLoading(false);
+function ChatBox({
+    question,
+    setQuestion,
+    loading,
+    onSubmit,
+}) {
+    const handleKeyDown = (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            onSubmit();
         }
     };
 
     return (
         <div className="chat-box">
-            <textarea
-                rows="4"
-                placeholder="Ask a question about the financial report..."
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-            />
 
-            <button
-                onClick={handleSubmit}
-                disabled={loading}
-            >
-                {loading ? "Thinking..." : "Ask AI"}
-            </button>
+            <div className="chat-input-container">
+
+                <textarea
+                    className="chat-input"
+                    rows="1"
+                    placeholder="Ask anything about your financial report..."
+                    value={question}
+                    disabled={loading}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                />
+
+                <button
+                    className="send-button"
+                    onClick={onSubmit}
+                    disabled={loading || !question.trim()}
+                >
+                    {loading ? "..." : "➜"}
+                </button>
+
+            </div>
+
         </div>
     );
 }

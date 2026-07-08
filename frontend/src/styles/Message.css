@@ -1,0 +1,19 @@
+.message {
+    width: 100%;
+}
+
+.message-text {
+    color: #e2e8f0;
+
+    font-size: 17px;
+
+    line-height: 1.8;
+
+    text-align: left;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
+
+    margin-bottom: 24px;
+}

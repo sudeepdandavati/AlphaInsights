@@ -1,0 +1,77 @@
+.document-info {
+    max-width: 900px;
+
+    margin: 20px auto;
+
+    padding: 22px;
+
+    background: #1e293b;
+
+    border: 1px solid #334155;
+
+    border-radius: 18px;
+}
+
+.document-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    margin-bottom: 22px;
+}
+
+.document-icon {
+    font-size: 34px;
+}
+
+.document-header h3 {
+    margin: 0;
+
+    color: #f8fafc;
+
+    font-size: 22px;
+}
+
+.document-header p {
+    margin-top: 6px;
+
+    color: #94a3b8;
+}
+
+.document-stats {
+    display: flex;
+
+    gap: 18px;
+}
+
+.stat-card {
+    flex: 1;
+
+    background: #0f172a;
+
+    border: 1px solid #334155;
+
+    border-radius: 14px;
+
+    padding: 18px;
+
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+
+    font-size: 26px;
+
+    font-weight: bold;
+
+    color: #60a5fa;
+}
+
+.stat-label {
+    display: block;
+
+    margin-top: 8px;
+
+    color: #94a3b8;
+}

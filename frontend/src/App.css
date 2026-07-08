@@ -1,184 +1,272 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+/* ===========================
+   Global
+=========================== */
 
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+body {
+    background: #0f172a;
+    color: #f8fafc;
+    font-family: Inter, Arial, sans-serif;
 }
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
-}
-
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
+.app {
     display: flex;
-    padding: 6px 12px;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* ===========================
+   Header
+=========================== */
+
+.header {
+    background: #111827;
+    border-bottom: 1px solid #273449;
+    padding: 18px 32px;
+}
+
+.header-content {
+    max-width: 1100px;
+    margin: auto;
+
+    display: flex;
     align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+    gap: 18px;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+.logo {
+    font-size: 46px;
 }
 
-.ticks {
-  position: relative;
-  width: 100%;
+.header-text h1 {
+    font-size: 38px;
+    font-weight: 700;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
+.header-text p {
+    color: #94a3b8;
+    margin-top: 4px;
+}
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+/* ===========================
+   Chat Window
+=========================== */
+
+.chat-window {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 40px 25px;
+
+    background: #0f172a;
+}
+
+/* ===========================
+   Conversation
+=========================== */
+
+.conversation-card {
+    max-width: 900px;
+    margin: auto;
+    margin-bottom: 40px;
+}
+
+/* ===========================
+   User
+=========================== */
+
+.user-card {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.user-card h3 {
+    color: #60a5fa;
+    margin-bottom: 8px;
+}
+
+.user-card p {
+    display: inline-block;
+
+    background: #2563eb;
+
+    padding: 14px 18px;
+
+    border-radius: 16px;
+
+    max-width: 70%;
+
+    text-align: left;
+}
+
+/* ===========================
+   Assistant
+=========================== */
+
+.assistant-card {
+    background: #1e293b;
+
+    border: 1px solid #334155;
+
+    border-radius: 18px;
+
+    padding: 22px;
+}
+
+.assistant-card h3 {
+    margin-bottom: 18px;
+}
+
+/* ===========================
+   Chat Input
+=========================== */
+
+.chat-box {
+    background: #111827;
+
+    border-top: 1px solid #273449;
+
+    padding: 20px;
+}
+
+.chat-box textarea {
+
+    width: 100%;
+
+    max-width: 900px;
+
+    display: block;
+
+    margin: auto;
+
+    resize: none;
+
+    border-radius: 16px;
+
+    border: 1px solid #334155;
+
+    background: #0f172a;
+
+    color: white;
+
+    padding: 16px;
+
+    font-size: 16px;
+}
+
+.chat-box button {
+
+    margin: 15px auto 0;
+
+    display: block;
+
+    background: #2563eb;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 12px 30px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.chat-box button:hover {
+    background: #1d4ed8;
+}
+
+.chat-box button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* ===========================
+   Welcome
+=========================== */
+
+.welcome {
+    max-width: 900px;
+    margin: 60px auto;
+    text-align: center;
+}
+
+.welcome-icon {
+    font-size: 70px;
+    margin-bottom: 20px;
+}
+
+.welcome h2 {
+    font-size: 38px;
+    margin-bottom: 15px;
+}
+
+.welcome p {
+    color: #94a3b8;
+    margin-bottom: 40px;
+}
+
+/* ===========================
+   Suggestions
+=========================== */
+
+.suggestion-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 20px;
+}
+
+.suggestion-card {
+
+    background: #1e293b;
+
+    border: 1px solid #334155;
+
+    border-radius: 16px;
+
+    padding: 22px;
+
+    cursor: pointer;
+
+    transition: .25s;
+}
+
+.suggestion-card:hover {
+
+    transform: translateY(-4px);
+
+    border-color: #3b82f6;
+}
+
+.suggestion-icon {
+
+    font-size: 30px;
+
+    margin-bottom: 12px;
+}
+
+.suggestion-card h3 {
+
+    margin-bottom: 12px;
+}
+
+.suggestion-card p {
+
+    color: #94a3b8;
+
+    line-height: 1.5;
+
+    font-size: 15px;
 }

@@ -1,6 +1,8 @@
+from pathlib import Path
+import shutil
 from typing import List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -8,6 +10,7 @@ from ingestion.pdf_parser import PDFParser
 from retrieval.retriever import Retriever
 from llm.prompt_builder import PromptBuilder
 from llm.answer_generator import AnswerGenerator
+from pipelines.ingestion_pipeline import IngestionPipeline
 
 
 app = FastAPI(
@@ -23,6 +26,15 @@ app = FastAPI(
 retriever = Retriever()
 prompt_builder = PromptBuilder()
 answer_generator = AnswerGenerator()
+ingestion_pipeline = IngestionPipeline()
+
+
+# -------------------------------------------------
+# Upload Configuration
+# -------------------------------------------------
+
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 
 # -------------------------------------------------
@@ -135,22 +147,18 @@ def ask(request: AskRequest):
     Retrieve relevant context and generate an answer using the LLM.
     """
 
-    # Retrieve relevant chunks
     chunks = retriever.retrieve(
         question=request.question,
         top_k=request.top_k
     )
 
-    # Build prompt
     prompt = prompt_builder.build_prompt(
         question=request.question,
         retrieved_chunks=chunks
     )
 
-    # Generate answer
     answer = answer_generator.generate(prompt)
 
-    # Build source list
     sources = [
         {
             "chunk_id": chunk["chunk_id"],
@@ -163,4 +171,37 @@ def ask(request: AskRequest):
         "question": request.question,
         "answer": answer,
         "sources": sources
+    }
+
+
+@app.post("/upload")
+async def upload_pdf(file: UploadFile = File(...)):
+    """
+    Upload a PDF, process it, generate embeddings,
+    and store everything in Qdrant.
+    """
+
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are allowed."
+        )
+
+    file_path = UPLOAD_DIR / file.filename
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Process the uploaded document
+    result = ingestion_pipeline.process(str(file_path))
+
+    return {
+        "message": "Document uploaded and indexed successfully.",
+        "document": {
+            "id": result["document_id"],
+            "name": result["document_name"],
+        },
+        "pages": result["page_count"],
+        "chunks": result["chunk_count"],
+        "embeddings": result["embedding_count"],
     }
