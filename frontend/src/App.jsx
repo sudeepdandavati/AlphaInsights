@@ -41,10 +41,10 @@ function App() {
 
             setDocumentInfo(result);
 
-            // Clear previous chat when a new document is uploaded
+            // Clear previous conversation
             setMessages([]);
 
-            // Clear any text in the input
+            // Clear input
             setQuestion("");
 
         } catch (error) {
@@ -144,6 +144,7 @@ function App() {
 
             <ChatWindow
                 messages={messages}
+                documentInfo={documentInfo}
                 onSuggestionClick={handleSuggestionClick}
             />
 

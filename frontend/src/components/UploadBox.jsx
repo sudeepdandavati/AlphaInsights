@@ -4,12 +4,11 @@ import "../styles/UploadBox.css";
 function UploadBox({ onUpload }) {
 
     const [selectedFile, setSelectedFile] = useState(null);
+    const [dragActive, setDragActive] = useState(false);
 
     const fileInputRef = useRef(null);
 
-    const handleFileChange = (event) => {
-
-        const file = event.target.files[0];
+    const validateFile = (file) => {
 
         if (!file) return;
 
@@ -19,7 +18,10 @@ function UploadBox({ onUpload }) {
         }
 
         setSelectedFile(file);
+    };
 
+    const handleFileChange = (event) => {
+        validateFile(event.target.files[0]);
     };
 
     const handleUpload = () => {
@@ -30,27 +32,53 @@ function UploadBox({ onUpload }) {
         }
 
         onUpload(selectedFile);
+    };
 
+    const handleDragOver = (event) => {
+        event.preventDefault();
+        setDragActive(true);
+    };
+
+    const handleDragLeave = () => {
+        setDragActive(false);
+    };
+
+    const handleDrop = (event) => {
+
+        event.preventDefault();
+
+        setDragActive(false);
+
+        const file = event.dataTransfer.files[0];
+
+        validateFile(file);
     };
 
     return (
 
-        <div className="upload-box">
+        <div
+            className={`upload-box ${dragActive ? "drag-active" : ""}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
 
             <h2>
                 📄 Upload Financial Report
             </h2>
 
             <p className="upload-subtitle">
-                Upload an annual report, SEC filing or financial statement.
+                Drag & Drop your PDF here
+                <br />
+                or choose a file below.
             </p>
 
             <input
                 ref={fileInputRef}
                 type="file"
                 accept=".pdf"
-                onChange={handleFileChange}
                 hidden
+                onChange={handleFileChange}
             />
 
             <button

@@ -1,42 +1,93 @@
 import { useEffect, useRef } from "react";
 
+import "../styles/ChatWindow.css";
+
 import Welcome from "./Welcome";
 import Message from "./Message";
 import SourceList from "./SourceList";
 
-function ChatWindow({ messages, onSuggestionClick }) {
-    // Reference to the bottom of the chat
+function ChatWindow({
+    messages,
+    onSuggestionClick,
+    documentInfo,
+}) {
     const bottomRef = useRef(null);
 
-    // Auto-scroll whenever a new message is added
     useEffect(() => {
         bottomRef.current?.scrollIntoView({
             behavior: "smooth",
         });
     }, [messages]);
 
-    // Show welcome screen when there are no conversations
-    if (messages.length === 0) {
+    // ----------------------------------------
+    // No document uploaded
+    // ----------------------------------------
+
+    if (!documentInfo) {
         return (
             <div className="chat-window">
-                <Welcome onSuggestionClick={onSuggestionClick} />
+                <Welcome
+                    onSuggestionClick={onSuggestionClick}
+                />
             </div>
         );
     }
 
+    // ----------------------------------------
+    // Document uploaded but no questions yet
+    // ----------------------------------------
+
+    if (messages.length === 0) {
+        return (
+            <div className="chat-window">
+
+                <div className="empty-chat">
+
+                    <div className="empty-chat-icon">
+                        💬
+                    </div>
+
+                    <h2>
+                        Ask your first question
+                    </h2>
+
+                    <p>
+                        Your document
+                        <strong> {documentInfo.document.name}</strong>
+                        {" "}has been indexed successfully.
+                    </p>
+
+                    <p>
+                        Start asking questions about the report.
+                    </p>
+
+                </div>
+
+            </div>
+        );
+    }
+
+    // ----------------------------------------
+    // Conversation
+    // ----------------------------------------
+
     return (
         <div className="chat-window">
+
             {messages.map((message, index) => (
+
                 <div
                     key={index}
                     className="conversation-card"
                 >
+
                     <div className="user-card">
                         <h3>👤 You</h3>
                         <p>{message.question}</p>
                     </div>
 
                     <div className="assistant-card">
+
                         <h3>🤖 AlphaInsights</h3>
 
                         <Message
@@ -48,12 +99,15 @@ function ChatWindow({ messages, onSuggestionClick }) {
                         <SourceList
                             sources={message.sources}
                         />
+
                     </div>
+
                 </div>
+
             ))}
 
-            {/* Invisible element used for auto-scroll */}
-            <div ref={bottomRef}></div>
+            <div ref={bottomRef} />
+
         </div>
     );
 }
