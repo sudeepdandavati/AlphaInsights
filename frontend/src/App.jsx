@@ -1,17 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import "./App.css";
 
 import Header from "./components/Header";
 import UploadBox from "./components/UploadBox";
 import DocumentInfo from "./components/DocumentInfo";
+import ExportChat from "./components/ExportChat";
 import ChatWindow from "./components/ChatWindow";
 import ChatBox from "./components/ChatBox";
+import Notification from "./components/Notification";
 
 import {
     askQuestion,
     uploadPDF,
 } from "./services/api";
+
+const CHAT_STORAGE_KEY = "alphainsights-chat";
+const DOCUMENT_STORAGE_KEY = "alphainsights-document";
 
 function App() {
 
@@ -26,6 +31,60 @@ function App() {
     const [uploading, setUploading] = useState(false);
 
     const [documentInfo, setDocumentInfo] = useState(null);
+
+    const [notification, setNotification] = useState({
+        type: "",
+        message: "",
+    });
+
+    // ----------------------------------------
+    // Restore saved session
+    // ----------------------------------------
+
+    useEffect(() => {
+
+        const savedMessages = localStorage.getItem(CHAT_STORAGE_KEY);
+        const savedDocument = localStorage.getItem(DOCUMENT_STORAGE_KEY);
+
+        if (savedMessages) {
+            setMessages(JSON.parse(savedMessages));
+        }
+
+        if (savedDocument) {
+            setDocumentInfo(JSON.parse(savedDocument));
+        }
+
+    }, []);
+
+    // ----------------------------------------
+    // Save chat whenever it changes
+    // ----------------------------------------
+
+    useEffect(() => {
+
+        localStorage.setItem(
+            CHAT_STORAGE_KEY,
+            JSON.stringify(messages)
+        );
+
+    }, [messages]);
+
+    // ----------------------------------------
+    // Save document whenever it changes
+    // ----------------------------------------
+
+    useEffect(() => {
+
+        if (documentInfo) {
+
+            localStorage.setItem(
+                DOCUMENT_STORAGE_KEY,
+                JSON.stringify(documentInfo)
+            );
+
+        }
+
+    }, [documentInfo]);
 
     // ----------------------------------------
     // Upload PDF
@@ -44,12 +103,26 @@ function App() {
             // Clear previous conversation
             setMessages([]);
 
-            // Clear input
             setQuestion("");
+
+            localStorage.removeItem(CHAT_STORAGE_KEY);
+
+            localStorage.setItem(
+                DOCUMENT_STORAGE_KEY,
+                JSON.stringify(result)
+            );
+
+            setNotification({
+                type: "success",
+                message: "Document uploaded and indexed successfully.",
+            });
 
         } catch (error) {
 
-            alert("Failed to upload document.");
+            setNotification({
+                type: "error",
+                message: "Failed to upload the document.",
+            });
 
         } finally {
 
@@ -69,7 +142,10 @@ function App() {
 
         if (!documentInfo) {
 
-            alert("Please upload a financial report first.");
+            setNotification({
+                type: "warning",
+                message: "Please upload a financial report first.",
+            });
 
             return;
 
@@ -77,24 +153,81 @@ function App() {
 
         setLoading(true);
 
+        setQuestion("");
+
+        // Show temporary AI typing message
+
+        setMessages((prev) => [
+
+            ...prev,
+
+            {
+
+                question: query,
+
+                answer: "",
+
+                sources: [],
+
+                isLoading: true,
+
+            },
+
+        ]);
+
         try {
 
             const response = await askQuestion(query);
 
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                    question: query,
-                    answer: response.answer,
-                    sources: response.sources,
-                },
-            ]);
+            setMessages((prev) => {
 
-            setQuestion("");
+                const updated = [...prev];
+
+                updated[updated.length - 1] = {
+
+                    question: query,
+
+                    answer: response.answer,
+
+                    sources: response.sources,
+
+                    isLoading: false,
+
+                };
+
+                return updated;
+
+            });
 
         } catch (error) {
 
-            alert("Failed to contact the backend.");
+            setMessages((prev) => {
+
+                const updated = [...prev];
+
+                updated[updated.length - 1] = {
+
+                    question: query,
+
+                    answer: "Unable to generate a response.",
+
+                    sources: [],
+
+                    isLoading: false,
+
+                };
+
+                return updated;
+
+            });
+
+            setNotification({
+
+                type: "error",
+
+                message: "Failed to contact the backend.",
+
+            });
 
         } finally {
 
@@ -120,6 +253,17 @@ function App() {
 
         <div className="app">
 
+            <Notification
+                type={notification.type}
+                message={notification.message}
+                onClose={() =>
+                    setNotification({
+                        type: "",
+                        message: "",
+                    })
+                }
+            />
+
             <Header />
 
             <UploadBox
@@ -127,6 +271,7 @@ function App() {
             />
 
             {uploading && (
+
                 <p
                     style={{
                         textAlign: "center",
@@ -136,9 +281,15 @@ function App() {
                 >
                     ⏳ Processing document...
                 </p>
+
             )}
 
             <DocumentInfo
+                documentInfo={documentInfo}
+            />
+
+            <ExportChat
+                messages={messages}
                 documentInfo={documentInfo}
             />
 
@@ -158,6 +309,7 @@ function App() {
         </div>
 
     );
+
 }
 
 export default App;

@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import "../styles/ChatBox.css";
 
 function ChatBox({
@@ -6,21 +8,74 @@ function ChatBox({
     loading,
     onSubmit,
 }) {
-    const handleKeyDown = (event) => {
-        if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault();
-            onSubmit();
+
+    const textareaRef = useRef(null);
+
+    // ----------------------------------------
+    // Auto-grow textarea
+    // ----------------------------------------
+
+    useEffect(() => {
+
+        if (!textareaRef.current) return;
+
+        textareaRef.current.style.height = "auto";
+
+        textareaRef.current.style.height =
+            `${textareaRef.current.scrollHeight}px`;
+
+    }, [question]);
+
+    // ----------------------------------------
+    // Focus after loading completes
+    // ----------------------------------------
+
+    useEffect(() => {
+
+        if (!loading && textareaRef.current) {
+
+            textareaRef.current.focus();
+
+            textareaRef.current.style.height = "auto";
+
         }
+
+    }, [loading]);
+
+    // ----------------------------------------
+    // Keyboard shortcuts
+    // ----------------------------------------
+
+    const handleKeyDown = (event) => {
+
+        // Shift + Enter = new line
+        if (event.key === "Enter" && event.shiftKey) {
+            return;
+        }
+
+        // Enter = Send
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            if (!loading && question.trim()) {
+                onSubmit();
+            }
+
+        }
+
     };
 
     return (
+
         <div className="chat-box">
 
             <div className="chat-input-container">
 
                 <textarea
+                    ref={textareaRef}
                     className="chat-input"
-                    rows="1"
+                    rows={1}
                     placeholder="Ask anything about your financial report..."
                     value={question}
                     disabled={loading}
@@ -33,13 +88,25 @@ function ChatBox({
                     onClick={onSubmit}
                     disabled={loading || !question.trim()}
                 >
-                    {loading ? "..." : "➜"}
+
+                    {loading ? (
+
+                        <span className="button-spinner"></span>
+
+                    ) : (
+
+                        "➜"
+
+                    )}
+
                 </button>
 
             </div>
 
         </div>
+
     );
+
 }
 
 export default ChatBox;

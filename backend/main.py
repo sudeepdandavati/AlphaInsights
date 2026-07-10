@@ -66,8 +66,11 @@ class AskRequest(BaseModel):
 
 
 class Source(BaseModel):
+    document_name: str
+
     chunk_id: int
     score: float
+    text: str
 
 
 class AskResponse(BaseModel):
@@ -147,22 +150,29 @@ def ask(request: AskRequest):
     Retrieve relevant context and generate an answer using the LLM.
     """
 
+    # Retrieve relevant chunks
     chunks = retriever.retrieve(
         question=request.question,
         top_k=request.top_k
     )
 
+    # Build prompt
     prompt = prompt_builder.build_prompt(
         question=request.question,
         retrieved_chunks=chunks
     )
 
+    # Generate answer
     answer = answer_generator.generate(prompt)
 
+    # Build source list
     sources = [
         {
+            "document_name": chunk["document_name"],
+
             "chunk_id": chunk["chunk_id"],
             "score": chunk["score"],
+            "text": chunk["text"],
         }
         for chunk in chunks
     ]
@@ -170,7 +180,7 @@ def ask(request: AskRequest):
     return {
         "question": request.question,
         "answer": answer,
-        "sources": sources
+        "sources": sources,
     }
 
 

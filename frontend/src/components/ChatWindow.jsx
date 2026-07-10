@@ -11,6 +11,7 @@ function ChatWindow({
     onSuggestionClick,
     documentInfo,
 }) {
+
     const bottomRef = useRef(null);
 
     useEffect(() => {
@@ -72,6 +73,7 @@ function ChatWindow({
     // ----------------------------------------
 
     return (
+
         <div className="chat-window">
 
             {messages.map((message, index) => (
@@ -81,10 +83,17 @@ function ChatWindow({
                     className="conversation-card"
                 >
 
+                    {/* ---------------- User ---------------- */}
+
                     <div className="user-card">
+
                         <h3>👤 You</h3>
+
                         <p>{message.question}</p>
+
                     </div>
+
+                    {/* ---------------- Assistant ---------------- */}
 
                     <div className="assistant-card">
 
@@ -94,11 +103,14 @@ function ChatWindow({
                             response={{
                                 answer: message.answer,
                             }}
+                            loading={message.isLoading}
                         />
 
-                        <SourceList
-                            sources={message.sources}
-                        />
+                        {!message.isLoading && (
+                            <SourceList
+                                sources={message.sources}
+                            />
+                        )}
 
                     </div>
 
@@ -109,6 +121,7 @@ function ChatWindow({
             <div ref={bottomRef} />
 
         </div>
+
     );
 }
 

@@ -15,13 +15,6 @@ class Retriever:
     def retrieve(self, question, top_k=5):
         """
         Retrieve the most relevant chunks.
-
-        Args:
-            question (str): User question
-            top_k (int): Number of results
-
-        Returns:
-            List[dict]: Retrieved chunks with metadata
         """
 
         query_embedding = self.embedding_generator.generate_embedding(question)
@@ -35,14 +28,20 @@ class Retriever:
 
         for point in results:
 
+            payload = point.payload
+
             retrieved_chunks.append(
                 {
                     "score": round(point.score, 4),
-                    "chunk_id": point.payload["chunk_id"],
-                    "text": point.payload["text"],
-                    "start": point.payload["start"],
-                    "end": point.payload["end"],
-                    "length": point.payload["length"],
+                    "document_id": payload.get("document_id"),
+                    "document_name": payload.get("document_name"),
+
+                    "chunk_id": payload["chunk_id"],
+                    "text": payload["text"],
+
+                    "start": payload["start"],
+                    "end": payload["end"],
+                    "length": payload["length"],
                 }
             )
 
