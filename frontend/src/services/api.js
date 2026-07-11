@@ -2,45 +2,94 @@ import axios from "axios";
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
-/**
- * Ask a question about the currently indexed document.
- */
-export async function askQuestion(question, topK = 3) {
-    try {
-        const response = await axios.post(`${API_BASE_URL}/ask`, {
-            question,
-            top_k: topK,
-        });
+// ----------------------------------------
+// Upload PDF
+// ----------------------------------------
 
-        return response.data;
-    } catch (error) {
-        console.error("API Error:", error);
-        throw error;
-    }
+export async function uploadPDF(file) {
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await axios.post(
+        `${API_BASE_URL}/upload`,
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
+
+    return response.data;
+
 }
 
-/**
- * Upload a PDF to the backend for ingestion.
- */
-export async function uploadPDF(file) {
-    try {
-        const formData = new FormData();
+// ----------------------------------------
+// Get all uploaded documents
+// ----------------------------------------
 
-        formData.append("file", file);
+export async function getDocuments() {
 
-        const response = await axios.post(
-            `${API_BASE_URL}/upload`,
-            formData,
-            {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            }
-        );
+    const response = await axios.get(
+        `${API_BASE_URL}/documents`
+    );
 
-        return response.data;
-    } catch (error) {
-        console.error("Upload Error:", error);
-        throw error;
-    }
+    return response.data.documents;
+
+}
+
+// ----------------------------------------
+// Get financial metrics
+// ----------------------------------------
+
+export async function getFinancialMetrics(documentId) {
+
+    const response = await axios.get(
+        `${API_BASE_URL}/documents/${documentId}/metrics`
+    );
+
+    return response.data.metrics;
+
+}
+
+// ----------------------------------------
+// Compare multiple documents
+// ----------------------------------------
+
+export async function compareDocuments(documentIds) {
+
+    const response = await axios.post(
+        `${API_BASE_URL}/compare`,
+        {
+            document_ids: documentIds,
+        }
+    );
+
+    return response.data;
+
+}
+
+// ----------------------------------------
+// Ask Question
+// ----------------------------------------
+
+export async function askQuestion(
+    question,
+    documentId,
+    topK = 3
+) {
+
+    const response = await axios.post(
+        `${API_BASE_URL}/ask`,
+        {
+            question,
+            document_id: documentId,
+            top_k: topK,
+        }
+    );
+
+    return response.data;
+
 }

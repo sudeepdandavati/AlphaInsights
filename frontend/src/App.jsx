@@ -1,28 +1,30 @@
 import { useEffect, useState } from "react";
-
 import "./App.css";
 
 import Header from "./components/Header";
 import UploadBox from "./components/UploadBox";
+import DocumentSidebar from "./components/DocumentSidebar";
 import DocumentInfo from "./components/DocumentInfo";
 import ExportChat from "./components/ExportChat";
 import ChatWindow from "./components/ChatWindow";
 import ChatBox from "./components/ChatBox";
 import Notification from "./components/Notification";
+import FinancialDashboard from "./components/FinancialDashboard";
+import ComparisonWorkspace from "./components/ComparisonWorkspace";
 
 import {
     askQuestion,
     uploadPDF,
+    getDocuments,
 } from "./services/api";
 
 const CHAT_STORAGE_KEY = "alphainsights-chat";
 const DOCUMENT_STORAGE_KEY = "alphainsights-document";
 
 function App() {
-
-    // ----------------------------------------
+    //----------------------------------------
     // Global State
-    // ----------------------------------------
+    //----------------------------------------
 
     const [messages, setMessages] = useState([]);
     const [question, setQuestion] = useState("");
@@ -32,17 +34,72 @@ function App() {
 
     const [documentInfo, setDocumentInfo] = useState(null);
 
+    //----------------------------------------
+    // Multi-document State
+    //----------------------------------------
+
+    const [documents, setDocuments] = useState([]);
+    const [selectedDocument, setSelectedDocument] = useState(null);
+
     const [notification, setNotification] = useState({
         type: "",
         message: "",
     });
 
-    // ----------------------------------------
-    // Restore saved session
-    // ----------------------------------------
+    //----------------------------------------
+    // Notification Helper
+    //----------------------------------------
+
+    const showNotification = (type, message) => {
+        setNotification({ type, message });
+
+        setTimeout(() => {
+            setNotification({
+                type: "",
+                message: "",
+            });
+        }, 3000);
+    };
+
+    //----------------------------------------
+// Load Documents
+//----------------------------------------
+
+const loadDocuments = async () => {
+    try {
+
+        const docs = await getDocuments();
+
+        setDocuments(docs);
+
+        if (docs.length === 0) return;
+
+        setSelectedDocument((current) => {
+
+            if (!current) {
+                return docs[0];
+            }
+
+            const existing = docs.find(
+                (doc) => doc.id === current.id
+            );
+
+            return existing ?? docs[0];
+
+        });
+
+    } catch (error) {
+
+        console.error("Failed to load documents:", error);
+
+    }
+};
+
+    //----------------------------------------
+    // Restore Session
+    //----------------------------------------
 
     useEffect(() => {
-
         const savedMessages = localStorage.getItem(CHAT_STORAGE_KEY);
         const savedDocument = localStorage.getItem(DOCUMENT_STORAGE_KEY);
 
@@ -51,58 +108,64 @@ function App() {
         }
 
         if (savedDocument) {
-            setDocumentInfo(JSON.parse(savedDocument));
+            const parsed = JSON.parse(savedDocument);
+
+            // Restore the saved document information
+            setDocumentInfo(parsed);
         }
 
+        loadDocuments();
     }, []);
 
-    // ----------------------------------------
-    // Save chat whenever it changes
-    // ----------------------------------------
+    //----------------------------------------
+    // Save Chat
+    //----------------------------------------
 
     useEffect(() => {
-
         localStorage.setItem(
             CHAT_STORAGE_KEY,
             JSON.stringify(messages)
         );
-
     }, [messages]);
 
-    // ----------------------------------------
-    // Save document whenever it changes
-    // ----------------------------------------
+    //----------------------------------------
+    // Save Document
+    //----------------------------------------
 
     useEffect(() => {
-
         if (documentInfo) {
-
             localStorage.setItem(
                 DOCUMENT_STORAGE_KEY,
                 JSON.stringify(documentInfo)
             );
-
         }
-
     }, [documentInfo]);
 
-    // ----------------------------------------
+    //----------------------------------------
     // Upload PDF
-    // ----------------------------------------
+    //----------------------------------------
 
     const handleUpload = async (file) => {
-
         setUploading(true);
 
         try {
-
             const result = await uploadPDF(file);
 
             setDocumentInfo(result);
 
-            // Clear previous conversation
-            setMessages([]);
+            await loadDocuments();
 
+            const uploadedDocument = {
+            id: result.document.id,
+            name: result.document.name,
+            pages: result.pages,
+            chunks: result.chunks,
+            embeddings: result.embeddings,
+        };
+
+setSelectedDocument(uploadedDocument);
+
+            setMessages([]);
             setQuestion("");
 
             localStorage.removeItem(CHAT_STORAGE_KEY);
@@ -112,204 +175,182 @@ function App() {
                 JSON.stringify(result)
             );
 
-            setNotification({
-                type: "success",
-                message: "Document uploaded and indexed successfully.",
-            });
-
+            showNotification(
+                "success",
+                "Document uploaded and indexed successfully."
+            );
         } catch (error) {
+            console.error(error);
 
-            setNotification({
-                type: "error",
-                message: "Failed to upload the document.",
-            });
-
+            showNotification(
+                "error",
+                "Failed to upload the document."
+            );
         } finally {
-
             setUploading(false);
-
         }
-
     };
 
-    // ----------------------------------------
+    //----------------------------------------
     // Submit Question
-    // ----------------------------------------
+    //----------------------------------------
 
     const handleSubmit = async (query = question) => {
-
         if (!query.trim()) return;
 
-        if (!documentInfo) {
-
-            setNotification({
-                type: "warning",
-                message: "Please upload a financial report first.",
-            });
-
+        if (!selectedDocument) {
+            showNotification(
+                "warning",
+                "Please select a document first."
+            );
             return;
-
         }
 
         setLoading(true);
-
         setQuestion("");
 
-        // Show temporary AI typing message
-
         setMessages((prev) => [
-
             ...prev,
-
             {
-
                 question: query,
-
                 answer: "",
-
                 sources: [],
-
                 isLoading: true,
-
             },
-
         ]);
 
         try {
-
-            const response = await askQuestion(query);
+            const response = await askQuestion(
+                query,
+                selectedDocument.id
+            );
 
             setMessages((prev) => {
-
                 const updated = [...prev];
 
                 updated[updated.length - 1] = {
-
                     question: query,
-
                     answer: response.answer,
-
                     sources: response.sources,
-
                     isLoading: false,
-
                 };
 
                 return updated;
-
             });
-
         } catch (error) {
+            console.error(error);
 
             setMessages((prev) => {
-
                 const updated = [...prev];
 
                 updated[updated.length - 1] = {
-
                     question: query,
-
                     answer: "Unable to generate a response.",
-
                     sources: [],
-
                     isLoading: false,
-
                 };
 
                 return updated;
-
             });
 
-            setNotification({
-
-                type: "error",
-
-                message: "Failed to contact the backend.",
-
-            });
-
+            showNotification(
+                "error",
+                "Failed to contact the backend."
+            );
         } finally {
-
             setLoading(false);
-
         }
-
     };
 
-    // ----------------------------------------
-    // Suggestion Cards
-    // ----------------------------------------
+    //----------------------------------------
+// Suggestions
+//----------------------------------------
 
-    const handleSuggestionClick = async (suggestion) => {
+const handleSuggestionClick = async (suggestion) => {
+    setQuestion(suggestion);
+    await handleSubmit(suggestion);
+};
 
-        setQuestion(suggestion);
+//----------------------------------------
+// Active Document
+//----------------------------------------
 
-        await handleSubmit(suggestion);
+const activeDocument = selectedDocument
+    ? {
+          document: {
+              id: selectedDocument.id,
+              name: selectedDocument.name,
+          },
+          pages: selectedDocument.pages,
+          chunks: selectedDocument.chunks,
+          embeddings: selectedDocument.embeddings,
+      }
+    : documentInfo;
 
-    };
+return (
+    <div className="app">
+        <Notification
+            type={notification.type}
+            message={notification.message}
+            onClose={() =>
+                setNotification({
+                    type: "",
+                    message: "",
+                })
+            }
+        />
 
-    return (
+        <Header />
 
-        <div className="app">
+        <UploadBox onUpload={handleUpload} />
 
-            <Notification
-                type={notification.type}
-                message={notification.message}
-                onClose={() =>
-                    setNotification({
-                        type: "",
-                        message: "",
-                    })
-                }
-            />
+        <DocumentSidebar
+            documents={documents}
+            selectedDocument={selectedDocument}
+            onSelectDocument={setSelectedDocument}
+        />
 
-            <Header />
+        {uploading && (
+            <p
+                style={{
+                    textAlign: "center",
+                    color: "#94a3b8",
+                    marginTop: "12px",
+                }}
+            >
+                ⏳ Processing document...
+            </p>
+        )}
 
-            <UploadBox
-                onUpload={handleUpload}
-            />
+        <DocumentInfo documentInfo={activeDocument} />
 
-            {uploading && (
+        <FinancialDashboard
+            selectedDocument={selectedDocument}
+        />
 
-                <p
-                    style={{
-                        textAlign: "center",
-                        color: "#94a3b8",
-                        marginTop: "12px",
-                    }}
-                >
-                    ⏳ Processing document...
-                </p>
+        <ComparisonWorkspace
+            documents={documents}
+        />
 
-            )}
+        <ExportChat
+        messages={messages}
+        documentInfo={activeDocument}
+        />
 
-            <DocumentInfo
-                documentInfo={documentInfo}
-            />
+        <ChatWindow
+            messages={messages}
+            documentInfo={activeDocument}
+            onSuggestionClick={handleSuggestionClick}
+        />
 
-            <ExportChat
-                messages={messages}
-                documentInfo={documentInfo}
-            />
-
-            <ChatWindow
-                messages={messages}
-                documentInfo={documentInfo}
-                onSuggestionClick={handleSuggestionClick}
-            />
-
-            <ChatBox
-                question={question}
-                setQuestion={setQuestion}
-                loading={loading}
-                onSubmit={handleSubmit}
-            />
-
-        </div>
-
-    );
-
+        <ChatBox
+            question={question}
+            setQuestion={setQuestion}
+            loading={loading}
+            onSubmit={handleSubmit}
+        />
+    </div>
+);
 }
 
 export default App;

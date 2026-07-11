@@ -12,7 +12,12 @@ class Retriever:
         self.embedding_generator = EmbeddingGenerator()
         self.vector_store = QdrantStore()
 
-    def retrieve(self, question, top_k=5):
+    def retrieve(
+    self,
+    question,
+    top_k=5,
+    document_id=None,
+):
         """
         Retrieve the most relevant chunks.
         """
@@ -20,9 +25,10 @@ class Retriever:
         query_embedding = self.embedding_generator.generate_embedding(question)
 
         results = self.vector_store.search(
-            query_embedding=query_embedding,
-            top_k=top_k,
-        )
+    query_embedding=query_embedding,
+    top_k=top_k,
+    document_id=document_id,
+)
 
         retrieved_chunks = []
 

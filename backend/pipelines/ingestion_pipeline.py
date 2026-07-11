@@ -6,6 +6,7 @@ from preprocessing.text_cleaner import TextCleaner
 from preprocessing.chunker import Chunker
 from embeddings.embedding_generator import EmbeddingGenerator
 from vectorstore.qdrant_store import QdrantStore
+from extraction.financial_metrics import FinancialMetricsExtractor
 
 
 class IngestionPipeline:
@@ -18,12 +19,15 @@ class IngestionPipeline:
 
         self.chunker = Chunker(
             chunk_size=1000,
-            chunk_overlap=200
+            chunk_overlap=200,
         )
 
         self.embedding_generator = EmbeddingGenerator()
 
         self.vector_store = QdrantStore()
+
+        # Financial metrics extractor
+        self.metrics_extractor = FinancialMetricsExtractor()
 
     def process(self, pdf_path):
         """
@@ -56,13 +60,19 @@ class IngestionPipeline:
         clean_text = self.cleaner.clean_text(raw_text)
 
         # -----------------------------------------
-        # Step 3: Chunk text
+        # Step 3: Extract Financial Metrics
+        # -----------------------------------------
+
+        metrics = self.metrics_extractor.extract(clean_text)
+
+        # -----------------------------------------
+        # Step 4: Chunk text
         # -----------------------------------------
 
         chunks = self.chunker.split_text(clean_text)
 
         # -----------------------------------------
-        # Step 4: Generate Embeddings
+        # Step 5: Generate Embeddings
         # -----------------------------------------
 
         chunk_texts = [
@@ -75,7 +85,7 @@ class IngestionPipeline:
         )
 
         # -----------------------------------------
-        # Step 5: Store in Qdrant
+        # Step 6: Store in Qdrant
         # -----------------------------------------
 
         self.vector_store.create_collection()
@@ -98,4 +108,5 @@ class IngestionPipeline:
             "chunk_count": len(chunks),
             "embedding_count": len(embeddings),
             "metadata": parser.get_metadata(),
+            "metrics": metrics,
         }

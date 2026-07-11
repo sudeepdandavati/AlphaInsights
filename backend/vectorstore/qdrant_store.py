@@ -5,6 +5,9 @@ from qdrant_client.models import (
     Distance,
     VectorParams,
     PointStruct,
+    Filter,
+    FieldCondition,
+    MatchValue,
 )
 
 
@@ -50,7 +53,7 @@ class QdrantStore:
         embeddings,
         document_name,
         document_id,
-        collection_name="alphainsights"
+        collection_name="alphainsights",
     ):
         """
         Upload chunks and embeddings to Qdrant.
@@ -67,10 +70,8 @@ class QdrantStore:
                     payload={
                         "document_id": document_id,
                         "document_name": document_name,
-
                         "chunk_id": chunk["chunk_id"],
                         "text": chunk["text"],
-
                         "start": chunk["start"],
                         "end": chunk["end"],
                         "length": chunk["length"],
@@ -89,15 +90,32 @@ class QdrantStore:
         self,
         query_embedding,
         top_k=5,
-        collection_name="alphainsights"
+        document_id=None,
+        collection_name="alphainsights",
     ):
         """
         Search for the most similar chunks in Qdrant.
+
+        If document_id is provided, search only within that document.
         """
+
+        query_filter = None
+
+        if document_id:
+
+            query_filter = Filter(
+                must=[
+                    FieldCondition(
+                        key="document_id",
+                        match=MatchValue(value=document_id),
+                    )
+                ]
+            )
 
         results = self.client.query_points(
             collection_name=collection_name,
             query=query_embedding,
+            query_filter=query_filter,
             limit=top_k,
         )
 

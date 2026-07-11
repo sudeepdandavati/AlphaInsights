@@ -11,6 +11,9 @@ from retrieval.retriever import Retriever
 from llm.prompt_builder import PromptBuilder
 from llm.answer_generator import AnswerGenerator
 from pipelines.ingestion_pipeline import IngestionPipeline
+from services.document_service import DocumentService
+from services.comparison_service import ComparisonService
+from services.comparison_service import ComparisonService
 
 
 app = FastAPI(
@@ -27,6 +30,11 @@ retriever = Retriever()
 prompt_builder = PromptBuilder()
 answer_generator = AnswerGenerator()
 ingestion_pipeline = IngestionPipeline()
+
+# Multi-document registry
+document_service = DocumentService()
+
+comparison_service = ComparisonService()
 
 
 # -------------------------------------------------
@@ -62,8 +70,11 @@ class SearchResponse(BaseModel):
 
 class AskRequest(BaseModel):
     question: str
+    document_id: str
     top_k: int = 3
 
+class CompareRequest(BaseModel):
+    document_ids: List[str]
 
 class Source(BaseModel):
     document_name: str
@@ -111,6 +122,54 @@ def health():
         "status": "healthy"
     }
 
+@app.get("/documents")
+def get_documents():
+    """
+    Return all uploaded documents.
+    """
+
+    return {
+        "documents": document_service.get_documents()
+    }
+
+@app.get("/documents/{document_id}/metrics")
+def get_document_metrics(document_id: str):
+    """
+    Return extracted financial metrics for a document.
+    """
+
+    document = document_service.get_document(document_id)
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found.",
+        )
+
+    return {
+        "document_id": document["id"],
+        "document_name": document["name"],
+        "metrics": document["metrics"],
+    }
+
+
+@app.post("/compare")
+def compare_reports(request: CompareRequest):
+    """
+    Compare multiple uploaded financial reports.
+    """
+
+    selected_documents = []
+
+    for document_id in request.document_ids:
+
+        document = document_service.get_document(document_id)
+
+        if document is not None:
+            selected_documents.append(document)
+
+    return comparison_service.compare(selected_documents)
+
 
 @app.get("/pdf-info")
 def pdf_info():
@@ -150,10 +209,11 @@ def ask(request: AskRequest):
     Retrieve relevant context and generate an answer using the LLM.
     """
 
-    # Retrieve relevant chunks
+   # Retrieve relevant chunks
     chunks = retriever.retrieve(
         question=request.question,
-        top_k=request.top_k
+        top_k=request.top_k,
+        document_id=request.document_id,
     )
 
     # Build prompt
@@ -202,8 +262,20 @@ async def upload_pdf(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+   
+
     # Process the uploaded document
     result = ingestion_pipeline.process(str(file_path))
+
+    # Register the uploaded document
+    document_service.register_document(
+        document_id=result["document_id"],
+        document_name=result["document_name"],
+        page_count=result["page_count"],
+        chunk_count=result["chunk_count"],
+        embedding_count=result["embedding_count"],
+        metrics=result["metrics"],
+    )
 
     return {
         "message": "Document uploaded and indexed successfully.",
