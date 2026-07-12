@@ -20,6 +20,7 @@ class QdrantStore:
         self.client = QdrantClient(
             host="localhost",
             port=6333,
+            check_compatibility=False,
         )
 
     def create_collection(self, collection_name="alphainsights"):

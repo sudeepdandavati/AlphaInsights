@@ -1,0 +1,169 @@
+/* ----------------------------------------
+   Financial Health Score
+---------------------------------------- */
+
+.financial-health {
+
+    margin: 30px 0;
+
+}
+
+.financial-health-title {
+
+    color: #f8fafc;
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    margin-bottom: 24px;
+
+}
+
+/* ----------------------------------------
+   Grid
+---------------------------------------- */
+
+.health-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 20px;
+
+}
+
+/* ----------------------------------------
+   Card
+---------------------------------------- */
+
+.health-card {
+
+    background: #111827;
+
+    border: 1px solid #273449;
+
+    border-radius: 18px;
+
+    padding: 24px;
+
+    text-align: center;
+
+    transition: all 0.25s ease;
+
+}
+
+.health-card:hover {
+
+    transform: translateY(-6px);
+
+    box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+
+}
+
+/* ----------------------------------------
+   Rank
+---------------------------------------- */
+
+.health-rank {
+
+    font-size: 34px;
+
+    margin-bottom: 12px;
+
+}
+
+/* ----------------------------------------
+   Company
+---------------------------------------- */
+
+.health-company {
+
+    color: white;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    margin-bottom: 12px;
+
+}
+
+/* ----------------------------------------
+   Score
+---------------------------------------- */
+
+.health-score {
+
+    font-size: 34px;
+
+    font-weight: bold;
+
+}
+
+/* ----------------------------------------
+   Score Colors
+---------------------------------------- */
+
+.score-excellent {
+
+    border-color: #22c55e;
+
+}
+
+.score-excellent .health-score {
+
+    color: #22c55e;
+
+}
+
+.score-good {
+
+    border-color: #3b82f6;
+
+}
+
+.score-good .health-score {
+
+    color: #3b82f6;
+
+}
+
+.score-average {
+
+    border-color: #f59e0b;
+
+}
+
+.score-average .health-score {
+
+    color: #f59e0b;
+
+}
+
+.score-poor {
+
+    border-color: #ef4444;
+
+}
+
+.score-poor .health-score {
+
+    color: #ef4444;
+
+}
+
+/* ----------------------------------------
+   Responsive
+---------------------------------------- */
+
+@media (max-width: 768px) {
+
+    .health-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}

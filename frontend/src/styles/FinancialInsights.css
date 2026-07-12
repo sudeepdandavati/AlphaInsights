@@ -1,0 +1,91 @@
+/* ----------------------------------------
+   AI Financial Insights
+---------------------------------------- */
+
+.financial-insights {
+
+    margin: 32px 0;
+
+}
+
+.financial-insights-title {
+
+    color: #f8fafc;
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    margin-bottom: 20px;
+
+}
+
+/* ----------------------------------------
+   Insights Card
+---------------------------------------- */
+
+.financial-insights-card {
+
+    background: #111827;
+
+    border: 1px solid #273449;
+
+    border-left: 5px solid #3b82f6;
+
+    border-radius: 16px;
+
+    padding: 24px;
+
+    transition: all 0.25s ease;
+
+}
+
+.financial-insights-card:hover {
+
+    transform: translateY(-4px);
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+
+}
+
+/* ----------------------------------------
+   Insight Text
+---------------------------------------- */
+
+.financial-insights-text {
+
+    color: #e2e8f0;
+
+    font-size: 16px;
+
+    line-height: 1.8;
+
+    white-space: pre-wrap;
+
+}
+
+/* ----------------------------------------
+   Responsive
+---------------------------------------- */
+
+@media (max-width: 768px) {
+
+    .financial-insights-card {
+
+        padding: 18px;
+
+    }
+
+    .financial-insights-title {
+
+        font-size: 20px;
+
+    }
+
+    .financial-insights-text {
+
+        font-size: 15px;
+
+    }
+
+}

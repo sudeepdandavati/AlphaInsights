@@ -2,12 +2,17 @@ from pathlib import Path
 import uuid
 
 from ingestion.pdf_parser import PDFParser
+
 from preprocessing.text_cleaner import TextCleaner
 from preprocessing.chunker import Chunker
-from embeddings.embedding_generator import EmbeddingGenerator
-from vectorstore.qdrant_store import QdrantStore
-from extraction.financial_metrics import FinancialMetricsExtractor
 
+from embeddings.embedding_generator import EmbeddingGenerator
+
+from vectorstore.qdrant_store import QdrantStore
+
+from extraction.financial_metrics import FinancialMetricsExtractor
+from extraction.table_extractor import TableExtractor
+from extraction.unit_detector import UnitDetector
 
 class IngestionPipeline:
     """
@@ -15,6 +20,7 @@ class IngestionPipeline:
     """
 
     def __init__(self):
+
         self.cleaner = TextCleaner()
 
         self.chunker = Chunker(
@@ -26,8 +32,10 @@ class IngestionPipeline:
 
         self.vector_store = QdrantStore()
 
-        # Financial metrics extractor
         self.metrics_extractor = FinancialMetricsExtractor()
+
+        self.table_extractor = TableExtractor()
+        self.unit_detector = UnitDetector()
 
     def process(self, pdf_path):
         """
@@ -54,25 +62,58 @@ class IngestionPipeline:
         raw_text = parser.extract_text()
 
         # -----------------------------------------
-        # Step 2: Clean text
+        # Step 2: Extract Tables
         # -----------------------------------------
 
-        clean_text = self.cleaner.clean_text(raw_text)
+        table_texts = self.table_extractor.extract_tables(
+            pdf_path
+        )
+
+        combined_text = raw_text
+
+        if table_texts:
+
+            combined_text += "\n\n"
+
+            combined_text += "\n\n".join(table_texts)
 
         # -----------------------------------------
-        # Step 3: Extract Financial Metrics
+        # Step 3: Clean Text
         # -----------------------------------------
 
-        metrics = self.metrics_extractor.extract(clean_text)
+        clean_text = self.cleaner.clean_text(
+            combined_text
+        )
 
         # -----------------------------------------
-        # Step 4: Chunk text
+        # Step 4: Detect Reporting Unit
         # -----------------------------------------
 
-        chunks = self.chunker.split_text(clean_text)
+        unit_info = self.unit_detector.detect(
+            clean_text
+        )
+
+        multiplier = unit_info["multiplier"]
 
         # -----------------------------------------
-        # Step 5: Generate Embeddings
+        # Step 4: Extract Financial Metrics
+        # -----------------------------------------
+
+        metrics = self.metrics_extractor.extract(
+            clean_text,
+            multiplier=multiplier,
+        )
+
+        # -----------------------------------------
+        # Step 5: Chunk Text
+        # -----------------------------------------
+
+        chunks = self.chunker.split_text(
+            clean_text
+        )
+
+        # -----------------------------------------
+        # Step 6: Generate Embeddings
         # -----------------------------------------
 
         chunk_texts = [
@@ -85,7 +126,7 @@ class IngestionPipeline:
         )
 
         # -----------------------------------------
-        # Step 6: Store in Qdrant
+        # Step 7: Store in Qdrant
         # -----------------------------------------
 
         self.vector_store.create_collection()
@@ -108,5 +149,6 @@ class IngestionPipeline:
             "chunk_count": len(chunks),
             "embedding_count": len(embeddings),
             "metadata": parser.get_metadata(),
+            "reporting_unit": unit_info,
             "metrics": metrics,
         }

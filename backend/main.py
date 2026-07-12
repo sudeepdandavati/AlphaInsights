@@ -14,6 +14,7 @@ from pipelines.ingestion_pipeline import IngestionPipeline
 from services.document_service import DocumentService
 from services.comparison_service import ComparisonService
 from services.comparison_service import ComparisonService
+from services.insights_service import InsightsService
 
 
 app = FastAPI(
@@ -35,6 +36,8 @@ ingestion_pipeline = IngestionPipeline()
 document_service = DocumentService()
 
 comparison_service = ComparisonService()
+
+insights_service = InsightsService()
 
 
 # -------------------------------------------------
@@ -168,7 +171,17 @@ def compare_reports(request: CompareRequest):
         if document is not None:
             selected_documents.append(document)
 
-    return comparison_service.compare(selected_documents)
+    comparison = comparison_service.compare(
+        selected_documents
+    )
+
+    insights = insights_service.generate_insights(
+        selected_documents
+    )
+
+    comparison["insights"] = insights
+
+    return comparison
 
 
 @app.get("/pdf-info")

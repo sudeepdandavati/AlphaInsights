@@ -6,6 +6,7 @@ import { compareDocuments } from "../services/api";
 
 import ComparisonSelector from "./ComparisonSelector";
 import ComparisonTable from "./ComparisonTable";
+import FinancialCharts from "./FinancialCharts";
 
 function ComparisonWorkspace({ documents }) {
 
@@ -74,6 +75,10 @@ function ComparisonWorkspace({ documents }) {
                 <>
 
                     <ComparisonTable
+                        comparisonData={comparisonData}
+                    />
+
+                    <FinancialCharts
                         comparisonData={comparisonData}
                     />
 
